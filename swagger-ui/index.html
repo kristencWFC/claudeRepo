@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Webex OpenAPI Specs — Swagger UI</title>
+  <title>Webex OpenAPI Specifications</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   <style>
     body {
@@ -19,6 +19,7 @@
       background: #1a1a2e;
       color: #fff;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      flex-wrap: wrap;
     }
     .topbar h1 {
       font-size: 18px;
@@ -26,9 +27,14 @@
       font-weight: 600;
       white-space: nowrap;
     }
+    .topbar .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
     .topbar label {
       font-size: 14px;
-      margin-left: auto;
     }
     .topbar select {
       font-size: 14px;
@@ -39,6 +45,12 @@
       color: #222;
       min-width: 220px;
     }
+    #spec-desc {
+      width: 100%;
+      margin: 0;
+      font-size: 13px;
+      color: #c7c7d9;
+    }
     #swagger-ui {
       max-width: 1460px;
       margin: 0 auto;
@@ -47,41 +59,49 @@
 </head>
 <body>
   <div class="topbar">
-    <h1>Webex OpenAPI Specs</h1>
-    <label for="spec-select">API:</label>
-    <select id="spec-select"></select>
+    <h1>Webex OpenAPI Specifications</h1>
+    <div class="controls">
+      <label for="spec-select">API:</label>
+      <select id="spec-select"></select>
+    </div>
+    <p id="spec-desc"></p>
   </div>
   <div id="swagger-ui"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
   <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>
   <script>
-    // Labels and order mirror the Webex public Postman workspace collections.
+    // The nine Webex API specifications, named and ordered as in the
+    // webex/webex-openapi-specs repository README. Each spec is a standalone
+    // OpenAPI document with its own internal tag organization, exactly as
+    // Webex publishes them.
     const SPECS = [
-      { name: "Webex Admin", file: "specs/webex-admin.json" },
-      { name: "Webex Broadworks Calling", file: "specs/webex-broadworks.json" },
-      { name: "Webex Cloud Calling", file: "specs/webex-cloud-calling.json" },
-      { name: "Webex Contact Center", file: "specs/webex-contact-center.json" },
-      { name: "Webex Device", file: "specs/webex-device.json" },
-      { name: "Webex for UCM", file: "specs/webex-ucm.json" },
-      { name: "Webex Meetings", file: "specs/webex-meeting.json" },
-      { name: "Webex Messaging", file: "specs/webex-messaging.json" },
-      { name: "Webex Wholesale", file: "specs/webex-wholesale.json" }
+      { name: "Webex Admin",          file: "specs/webex-admin.json",          desc: "Administrative APIs for managing Webex organizations" },
+      { name: "Webex BroadWorks",     file: "specs/webex-broadworks.json",     desc: "APIs for Webex BroadWorks integration" },
+      { name: "Webex Cloud Calling",  file: "specs/webex-cloud-calling.json",  desc: "Cloud calling service APIs" },
+      { name: "Webex Contact Center", file: "specs/webex-contact-center.json", desc: "Contact center management APIs" },
+      { name: "Webex Device",         file: "specs/webex-device.json",         desc: "Device management and configuration APIs" },
+      { name: "Webex Meeting",        file: "specs/webex-meeting.json",        desc: "Meeting creation and management APIs" },
+      { name: "Webex Messaging",      file: "specs/webex-messaging.json",      desc: "Messaging and collaboration APIs" },
+      { name: "Webex UCM",            file: "specs/webex-ucm.json",            desc: "Unified Communications Manager APIs" },
+      { name: "Webex Wholesale",      file: "specs/webex-wholesale.json",      desc: "Wholesale platform APIs" }
     ];
 
     const select = document.getElementById("spec-select");
-    SPECS.forEach((spec, i) => {
+    const descEl = document.getElementById("spec-desc");
+    SPECS.forEach((spec) => {
       const opt = document.createElement("option");
       opt.value = spec.file;
       opt.textContent = spec.name;
-      if (i === 0) opt.selected = true;
       select.appendChild(opt);
     });
 
     let ui;
     function loadSpec(url) {
+      const spec = SPECS.find((s) => s.file === url) || SPECS[0];
+      descEl.textContent = spec.desc;
       ui = SwaggerUIBundle({
-        url: url,
+        url: spec.file,
         dom_id: "#swagger-ui",
         deepLinking: true,
         presets: [
@@ -95,10 +115,10 @@
       });
     }
 
-    // Allow ?spec=specs/xxx.json deep-linking on load.
+    // Support ?spec=specs/xxx.json deep-linking on load.
     const params = new URLSearchParams(window.location.search);
     const initial = params.get("spec");
-    if (initial && SPECS.some(s => s.file === initial)) {
+    if (initial && SPECS.some((s) => s.file === initial)) {
       select.value = initial;
     }
 
