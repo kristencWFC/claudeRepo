@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Webex OpenAPI Specs — Swagger UI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    body {
+      margin: 0;
+      background: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      background: #1a1a2e;
+      color: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+    .topbar h1 {
+      font-size: 18px;
+      margin: 0;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .topbar label {
+      font-size: 14px;
+      margin-left: auto;
+    }
+    .topbar select {
+      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #222;
+      min-width: 220px;
+    }
+    #swagger-ui {
+      max-width: 1460px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Webex OpenAPI Specs</h1>
+    <label for="spec-select">API:</label>
+    <select id="spec-select"></select>
+  </div>
+  <div id="swagger-ui"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>
+  <script>
+    const SPECS = [
+      { name: "Webex Admin", file: "specs/webex-admin.json" },
+      { name: "Webex BroadWorks", file: "specs/webex-broadworks.json" },
+      { name: "Webex Cloud Calling", file: "specs/webex-cloud-calling.json" },
+      { name: "Webex Contact Center", file: "specs/webex-contact-center.json" },
+      { name: "Webex Device", file: "specs/webex-device.json" },
+      { name: "Webex Meeting", file: "specs/webex-meeting.json" },
+      { name: "Webex Messaging", file: "specs/webex-messaging.json" },
+      { name: "Webex UCM", file: "specs/webex-ucm.json" },
+      { name: "Webex Wholesale", file: "specs/webex-wholesale.json" }
+    ];
+
+    const select = document.getElementById("spec-select");
+    SPECS.forEach((spec, i) => {
+      const opt = document.createElement("option");
+      opt.value = spec.file;
+      opt.textContent = spec.name;
+      if (i === 0) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    let ui;
+    function loadSpec(url) {
+      ui = SwaggerUIBundle({
+        url: url,
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      });
+    }
+
+    // Allow ?spec=specs/xxx.json deep-linking on load.
+    const params = new URLSearchParams(window.location.search);
+    const initial = params.get("spec");
+    if (initial && SPECS.some(s => s.file === initial)) {
+      select.value = initial;
+    }
+
+    select.addEventListener("change", () => {
+      loadSpec(select.value);
+      const url = new URL(window.location);
+      url.searchParams.set("spec", select.value);
+      window.history.replaceState({}, "", url);
+    });
+
+    loadSpec(select.value);
+  </script>
+</body>
+</html>
