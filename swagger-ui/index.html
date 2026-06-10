@@ -104,6 +104,8 @@
         url: spec.file,
         dom_id: "#swagger-ui",
         deepLinking: true,
+        filter: true,             // adds a search box to filter operations within the category
+        docExpansion: "list",     // show every sub-group header so the whole category is scannable
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
